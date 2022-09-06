@@ -9,7 +9,7 @@ const address = '8m2b8ar9BNZErJQgSBwY3eCe73yR4k9qHUxxGffxyw2d';
 const LAMPORTS_PER_SOL = 1000000000;
 let mostRecentTxn = '';
 console.log('Server started');
-setInterval(async () => {
+const interval = setInterval(async () => {
     const res = await fetch(`https://api.helius.xyz/v0/addresses/${address}/nft-events?type=NFT_SALE&api-key=${API_KEY}&until=${mostRecentTxn}`);
     const data = await res.json();
     if (!data.length)
@@ -26,11 +26,12 @@ setInterval(async () => {
         console.log(n);
     }
     mostRecentTxn = data[0].signature;
-    // 1 minute
-}, 60000);
+    // 30 seconds
+}, 30000);
 process.on('uncaughtException', async (err) => {
     console.error('Uncaught Exception: ', err);
     console.log('Most Recent Transaction: ', mostRecentTxn);
+    clearInterval(interval);
     await prisma.$disconnect();
     process.exit(1);
 });
