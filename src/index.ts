@@ -13,6 +13,8 @@ const LAMPORTS_PER_SOL = 1000000000
 
 let mostRecentTxn = ''
 
+console.log('Server started')
+
 setInterval(async () => {
   const res = await fetch(`https://api.helius.xyz/v0/addresses/${address}/nft-events?type=NFT_SALE&api-key=${API_KEY}&until=${mostRecentTxn}`)
   const data = await res.json() as HeliusNftEventResponseType[]

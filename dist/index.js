@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import dayjs from 'dayjs';
 import fetch from 'node-fetch';
+import * as dotenv from 'dotenv';
+dotenv.config();
 const prisma = new PrismaClient();
-const API_KEY = '7d543dcc-00ed-4293-8690-4baa82f46170';
+const API_KEY = process.env.HELIUS_API_KEY;
 const address = '8m2b8ar9BNZErJQgSBwY3eCe73yR4k9qHUxxGffxyw2d';
 const LAMPORTS_PER_SOL = 1000000000;
 let mostRecentTxn = '';
@@ -26,7 +28,8 @@ setInterval(async () => {
     // 2 minutes
 }, 120000);
 process.on('uncaughtException', async (err) => {
-    console.error(err);
+    console.error('Uncaught Exception: ', err);
+    console.log('Most Recent Transaction: ', mostRecentTxn);
     await prisma.$disconnect();
     process.exit(1);
 });
