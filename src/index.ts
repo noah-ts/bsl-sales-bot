@@ -34,8 +34,8 @@ const interval = setInterval(async () => {
 
   mostRecentTxn = data[0].signature
 
-  // 30 seconds
-}, 30000)
+  // 10 seconds
+}, 10000)
 
 process.on('uncaughtException', async err => {
   console.error('Uncaught Exception: ', err)
