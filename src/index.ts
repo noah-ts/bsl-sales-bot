@@ -34,8 +34,8 @@ setInterval(async () => {
 
   mostRecentTxn = data[0].signature
 
-  // 2 minutes
-}, 120000)
+  // 1 minute
+}, 60000)
 
 process.on('uncaughtException', async err => {
   console.error('Uncaught Exception: ', err)
