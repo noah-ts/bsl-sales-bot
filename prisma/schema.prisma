@@ -16,4 +16,13 @@ model Nft {
   imageUrl String
   lastSaleDate String?
   lastSaleAmountSol Float?
+  owner User? @relation(fields: [ownerWalletAddress], references: [walletAddress])
+  ownerWalletAddress String?
+}
+
+model User {
+  walletAddress String @id @unique
+  twitter String?
+  discord String?
+  nfts Nft[]
 }
