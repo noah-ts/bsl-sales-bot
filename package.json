@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "compile": "./node_modules/.bin/tsc",
+    "migrate": "./node_modules/.bin/prisma migrate dev",
+    "build": "yarn migrate && yarn compile",
     "start-js": "node dist/index.js",
     "start": "yarn compile && yarn start-js"
   },
