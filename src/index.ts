@@ -1,9 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import dayjs from 'dayjs'
 import fetch from 'node-fetch'
+import { setTimeout } from 'timers/promises'
+import http from 'http'
 import { HeliusNftEventResponseType } from './HeliusNftEventResType'
 import * as dotenv from 'dotenv'
-import { setTimeout } from 'timers/promises'
 dotenv.config()
 
 const prisma = new PrismaClient()
@@ -53,3 +54,8 @@ process.on('uncaughtException', async err => {
   await prisma.$disconnect()
   process.exit(1)
 })
+
+http.createServer((req, res) => {
+  res.write('Hello')
+  res.end()
+}).listen(8080)

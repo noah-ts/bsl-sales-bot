@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import dayjs from 'dayjs';
 import fetch from 'node-fetch';
-import * as dotenv from 'dotenv';
 import { setTimeout } from 'timers/promises';
+import http from 'http';
+import * as dotenv from 'dotenv';
 dotenv.config();
 const prisma = new PrismaClient();
 const API_KEY = process.env.HELIUS_API_KEY;
@@ -45,3 +46,7 @@ process.on('uncaughtException', async (err) => {
     await prisma.$disconnect();
     process.exit(1);
 });
+http.createServer((req, res) => {
+    res.write('Hello');
+    res.end();
+}).listen(8080);
