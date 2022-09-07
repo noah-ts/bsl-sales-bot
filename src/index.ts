@@ -1,10 +1,11 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, User } from '@prisma/client'
 import dayjs from 'dayjs'
 import fetch from 'node-fetch'
 import { setTimeout } from 'timers/promises'
 import http from 'http'
 import { HeliusNftEventResponseType } from './HeliusNftEventResType'
 import * as dotenv from 'dotenv'
+import { NotFoundError } from '@prisma/client/runtime/index.js'
 dotenv.config()
 
 const prisma = new PrismaClient()
@@ -28,12 +29,27 @@ const salesBot = async () => {
     
       for (let i = data.length - 1; i >= 0; i--) {
         const event = data[i]
+        let user: User
+
+        try {
+          user = await prisma.user.findFirstOrThrow({ where: { walletAddress: event.buyer } })
+        } catch (error) {
+          if (error instanceof NotFoundError) {
+            user = await prisma.user.create({
+              data: { walletAddress: event.buyer }
+            })
+          } else {
+            console.error(error)
+            continue
+          }
+        }
+
         const n = await prisma.nft.update({
           where: { mint: event.nfts[0].mint },
           data: {
+            ownerWalletAddress: user.walletAddress,
             lastSaleDate: dayjs.unix(event.timestamp).format(),
-            lastSaleAmountSol: Number(event.amount) / LAMPORTS_PER_SOL,
-            ownerWalletAddress: event.buyer
+            lastSaleAmountSol: Number(event.amount) / LAMPORTS_PER_SOL
           }
         })
         console.log(n)
@@ -41,7 +57,7 @@ const salesBot = async () => {
     
       mostRecentTxn = data[0].signature
     } catch (err) {
-      console.error('Error fetching from helius: ', err)
+      console.error(err)
       continue
     }
   }
