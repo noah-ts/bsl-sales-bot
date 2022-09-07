@@ -18,7 +18,7 @@ const salesBot = async () => {
             const res = await fetch(`https://api.helius.xyz/v0/addresses/${address}/nft-events?type=NFT_SALE&api-key=${API_KEY}&until=${mostRecentTxn}`);
             const data = await res.json();
             if (!data.length)
-                return;
+                continue;
             for (let i = data.length - 1; i >= 0; i--) {
                 const event = data[i];
                 const n = await prisma.nft.update({
@@ -34,7 +34,7 @@ const salesBot = async () => {
         }
         catch (err) {
             console.error('Error fetching from helius: ', err);
-            return;
+            continue;
         }
     }
 };

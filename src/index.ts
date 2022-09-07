@@ -23,7 +23,7 @@ const salesBot = async () => {
       await setTimeout(120000)
       const res = await fetch(`https://api.helius.xyz/v0/addresses/${address}/nft-events?type=NFT_SALE&api-key=${API_KEY}&until=${mostRecentTxn}`)
       const data = await res.json() as HeliusNftEventResponseType[]
-      if (!data.length) return
+      if (!data.length) continue
     
       for (let i = data.length - 1; i >= 0; i--) {
         const event = data[i]
@@ -40,7 +40,7 @@ const salesBot = async () => {
       mostRecentTxn = data[0].signature
     } catch (err) {
       console.error('Error fetching from helius: ', err)
-      return
+      continue
     }
   }
 }
