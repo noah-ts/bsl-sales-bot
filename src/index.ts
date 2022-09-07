@@ -32,7 +32,7 @@ const salesBot = async () => {
         let user: User
 
         try {
-          user = await prisma.user.findUniqueOrThrow({ where: { walletAddress: event.buyer } })
+          user = await prisma.user.findFirstOrThrow({ where: { walletAddress: event.buyer } })
         } catch (error) {
           if (error instanceof NotFoundError) {
             user = await prisma.user.create({
