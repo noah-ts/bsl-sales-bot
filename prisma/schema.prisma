@@ -18,7 +18,7 @@ model Nft {
   lastSaleAmountSol Float?
   owner User @relation(fields: [ownerWalletAddress], references: [walletAddress])
   ownerWalletAddress String
-  isStaked Boolean?
+  isStaked Boolean
 }
 
 model User {

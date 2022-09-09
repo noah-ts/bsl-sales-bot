@@ -43,7 +43,8 @@ const salesBot = async () => {
                     data: {
                         ownerWalletAddress: user.walletAddress,
                         lastSaleDate: dayjs.unix(event.timestamp).format(),
-                        lastSaleAmountSol: Number(event.amount) / LAMPORTS_PER_SOL
+                        lastSaleAmountSol: Number(event.amount) / LAMPORTS_PER_SOL,
+                        isStaked: false
                     }
                 });
                 console.log(n);
