@@ -1,10 +1,11 @@
-import { PrismaClient, Status } from '@prisma/client'
+import { PrismaClient, Status, User } from '@prisma/client'
 import { setTimeout } from 'timers/promises'
 import { readFile } from 'fs/promises'
 import http from 'http'
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import dayjs from 'dayjs'
 import * as dotenv from 'dotenv'
+import { NotFoundError } from '@prisma/client/runtime/index.js'
 dotenv.config()
 
 const SOL_CLUSTER_URL = process.env.SOL_CLUSTER_URL
@@ -103,10 +104,25 @@ const main = async () => {
     for (const mint of mints) {
         const mintData = await getMintData(mint)
         if (!mintData) continue
+
+        let user: User
+        try {
+            user = await prisma.user.findUniqueOrThrow({ where: { walletAddress: mintData.userWalletAddress } })
+        } catch (error) {
+            if (error instanceof NotFoundError) {
+                user = await prisma.user.create({
+                    data: { walletAddress: mintData.userWalletAddress }
+                })
+            } else {
+                console.error(error)
+                continue
+            }
+        }
+
         const updatedNft = await prisma.nft.update({
             where: { mint },
             data: {
-                ownerWalletAddress: mintData.userWalletAddress,
+                ownerWalletAddress: user.walletAddress,
                 status: mintData.status,
                 lastSaleDate: mintData.lastSaleDate ? mintData.lastSaleDate : undefined,
                 lastSaleAmountSol: mintData.lastSaleAmountSol ? mintData.lastSaleAmountSol : undefined
