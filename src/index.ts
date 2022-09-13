@@ -19,10 +19,10 @@ console.log('Server started')
 
 const main = async () => {
   let count = 0
-  const nfts = await prisma.nft.findMany({ orderBy: { mint: 'asc' }, skip: 545 })
+  const nfts = await prisma.nft.findMany({ orderBy: { mint: 'asc' }, skip: 3260 })
   for (const nft of nfts) {
       // 10 seconds
-      await setTimeout(10000)
+      // await setTimeout(10000)
       count++
       console.log(count)
       const res = await fetch(`https://api.helius.xyz/v0/addresses/${nft.mint}/nft-events?api-key=${API_KEY}&type=NFT_SALE`)
