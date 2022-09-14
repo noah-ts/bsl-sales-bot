@@ -25,7 +25,7 @@ const getMintData = async (mint: string): Promise<MintData> => {
     try {
         const mintPubKey = new PublicKey(mint)
 
-        const signatures = await connection.getSignaturesForAddress(mintPubKey, { until: untilMap.get(mint) })
+        const signatures = await connection.getSignaturesForAddress(mintPubKey, { until: untilMap.get(mint), limit: 10 })
         if (!signatures?.length) return null
         untilMap.set(mint, signatures[0].signature)
 
@@ -94,41 +94,43 @@ const getPrice = (logs: string[]): number => {
 const prisma = new PrismaClient()
 
 const main = async () => {
-    // 2 minutes
-    await setTimeout(120000)
+    while (true) {
+        // 10 minutes
+        await setTimeout(600000)
 
-    const json = await readFile('./collection_mints/blocksmith_labs_mints.json', { encoding: 'utf-8' })
-    const data = JSON.parse(json)
-    const mints: string[] = data.mints.map(m => m.mint)
+        const json = await readFile('./collection_mints/blocksmith_labs_mints.json', { encoding: 'utf-8' })
+        const data = JSON.parse(json)
+        const mints: string[] = data.mints.map(m => m.mint)
 
-    for (const mint of mints) {
-        const mintData = await getMintData(mint)
-        if (!mintData) continue
+        for (const mint of mints) {
+            const mintData = await getMintData(mint)
+            if (!mintData) continue
 
-        let user: User
-        try {
-            user = await prisma.user.findUniqueOrThrow({ where: { walletAddress: mintData.userWalletAddress } })
-        } catch (error) {
-            if (error instanceof NotFoundError) {
-                user = await prisma.user.create({
-                    data: { walletAddress: mintData.userWalletAddress }
-                })
-            } else {
-                console.error(error)
-                continue
+            let user: User
+            try {
+                user = await prisma.user.findUniqueOrThrow({ where: { walletAddress: mintData.userWalletAddress } })
+            } catch (error) {
+                if (error instanceof NotFoundError) {
+                    user = await prisma.user.create({
+                        data: { walletAddress: mintData.userWalletAddress }
+                    })
+                } else {
+                    console.error(error)
+                    continue
+                }
             }
+
+            const updatedNft = await prisma.nft.update({
+                where: { mint },
+                data: {
+                    ownerWalletAddress: user.walletAddress,
+                    status: mintData.status,
+                    lastSaleDate: mintData.lastSaleDate ? mintData.lastSaleDate : undefined,
+                    lastSaleAmountSol: mintData.lastSaleAmountSol ? mintData.lastSaleAmountSol : undefined
+                }
+            })
+            console.log(updatedNft)
         }
-
-        const updatedNft = await prisma.nft.update({
-            where: { mint },
-            data: {
-                ownerWalletAddress: user.walletAddress,
-                status: mintData.status,
-                lastSaleDate: mintData.lastSaleDate ? mintData.lastSaleDate : undefined,
-                lastSaleAmountSol: mintData.lastSaleAmountSol ? mintData.lastSaleAmountSol : undefined
-            }
-        })
-        console.log(updatedNft)
     }
 }
 
